@@ -34,6 +34,7 @@
 #include <wx/image.h>
 #include <wx/tooltip.h>
 #include <wx/stdpaths.h>
+#include <wx/filename.h>
 #include <wx/utils.h>
 
 #include <wx/debugrpt.h>
@@ -41,6 +42,25 @@
 IMPLEMENT_APP( Guayadeque::guMainApp );
 
 namespace Guayadeque {
+
+// -------------------------------------------------------------------------------- //
+// Returns the folder holding the default data files. Looks first relative to the
+// executable ( <prefix>/bin/../share/guayadeque ) so relocatable installs like
+// AppImages work, then falls back to the compiled in and /usr/local locations.
+static wxString guGetDataDir( void )
+{
+    wxFileName ExeFile( wxStandardPaths::Get().GetExecutablePath() );
+    ExeFile.RemoveLastDir();
+    ExeFile.AppendDir( wxT( "share" ) );
+    ExeFile.AppendDir( wxT( "guayadeque" ) );
+    wxString DataDirs[] = { ExeFile.GetPath(), wxT( DATADIR ), wxT( "/usr/local/share/guayadeque" ) };
+    for( size_t Index = 0; Index < WXSIZEOF( DataDirs ); Index++ )
+    {
+        if( wxDirExists( DataDirs[ Index ] ) )
+            return DataDirs[ Index ];
+    }
+    return wxT( DATADIR );
+}
 
 // -------------------------------------------------------------------------------- //
 guMainApp::guMainApp() : wxApp()
@@ -111,45 +131,30 @@ guMainApp::guMainApp() : wxApp()
 
     if( !wxFileExists( guPATH_CONFIG_FILENAME ) )
     {
-        if( wxFileExists( wxT( DATADIR "/guayadeque.default.conf" ) ) )
+        wxString DefaultFile = guGetDataDir() + wxT( "/guayadeque.default.conf" );
+        if( wxFileExists( DefaultFile ) )
         {
-            wxCopyFile( wxT( DATADIR "/guayadeque.default.conf" ),
-                        guPATH_CONFIG_FILENAME, false );
-        }
-        else if( wxFileExists( wxT( "/usr/local/share/guayadeque/guayadeque.default.conf" ) ) )
-        {
-            wxCopyFile( wxT( "/usr/local/share/guayadeque/guayadeque.default.conf" ),
-                        guPATH_CONFIG_FILENAME, false );
+            wxCopyFile( DefaultFile, guPATH_CONFIG_FILENAME, false );
         }
         guLogMessage( wxT( "Created the default configuration file" ) );
     }
 
     if( !wxFileExists( guPATH_EQUALIZERS_FILENAME ) )
     {
-        if( wxFileExists( wxT( DATADIR "/equalizers.default.conf" ) ) )
+        wxString DefaultFile = guGetDataDir() + wxT( "/equalizers.default.conf" );
+        if( wxFileExists( DefaultFile ) )
         {
-            wxCopyFile( wxT( DATADIR "/equalizers.default.conf" ),
-                        guPATH_EQUALIZERS_FILENAME, false );
-        }
-        else if( wxFileExists( wxT( "/usr/local/share/guayadeque/equalizers.default.conf" ) ) )
-        {
-            wxCopyFile( wxT( "/usr/local/share/guayadeque/equalizers.default.conf" ),
-                        guPATH_EQUALIZERS_FILENAME, false );
+            wxCopyFile( DefaultFile, guPATH_EQUALIZERS_FILENAME, false );
         }
         guLogMessage( wxT( "Created the default equalizers file" ) );
     }
 
     if( !wxFileExists( guPATH_LYRICS_SOURCES_FILENAME ) )
     {
-        if( wxFileExists( wxT( DATADIR "/lyrics_sources.xml" ) ) )
+        wxString DefaultFile = guGetDataDir() + wxT( "/lyrics_sources.xml" );
+        if( wxFileExists( DefaultFile ) )
         {
-            wxCopyFile( wxT( DATADIR "/lyrics_sources.xml" ),
-                        guPATH_LYRICS_SOURCES_FILENAME, false );
-        }
-        else if( wxFileExists( wxT( "/usr/local/share/guayadeque/lyrics_sources.xml" ) ) )
-        {
-            wxCopyFile( wxT( "/usr/local/share/guayadeque/lyrics_sources.xml" ),
-                        guPATH_LYRICS_SOURCES_FILENAME, false );
+            wxCopyFile( DefaultFile, guPATH_LYRICS_SOURCES_FILENAME, false );
         }
         guLogMessage( wxT( "Created the default lyrics sources file" ) );
     }
@@ -379,6 +384,11 @@ bool guMainApp::OnInit()
     int LangId = m_Config->ReadNum( CONFIG_KEY_GENERAL_LANGUAGE, wxLANGUAGE_DEFAULT, CONFIG_PATH_GENERAL );
     if( m_Locale.Init( LangId ) )
     {
+        wxFileName LocaleDir( wxStandardPaths::Get().GetExecutablePath() );
+        LocaleDir.RemoveLastDir();
+        LocaleDir.AppendDir( wxT( "share" ) );
+        LocaleDir.AppendDir( wxT( "locale" ) );
+        m_Locale.AddCatalogLookupPathPrefix( LocaleDir.GetPath() );
         m_Locale.AddCatalogLookupPathPrefix( wxT( "/usr/share/locale" ) );
         m_Locale.AddCatalog( wxT( "guayadeque" ) );
         guLogMessage( wxT( "Initialized locale ( %s )" ), m_Locale.GetName().c_str() );

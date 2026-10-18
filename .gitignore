@@ -10,3 +10,4 @@ src/guayadeque
 Version.h
 CMakeLists.txt.user
 
+*.AppImage
