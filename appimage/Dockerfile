@@ -5,7 +5,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential cmake pkg-config gettext git file wget ca-certificates \
+        build-essential cmake pkg-config gettext git file wget ca-certificates patchelf \
         libwxgtk3.0-gtk3-dev libwxsqlite3-3.0-dev \
         libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
         libtag1-dev libsqlite3-dev libcurl4-gnutls-dev libdbus-1-dev \

@@ -16,6 +16,7 @@ make -C "$BUILD_DIR" install DESTDIR="$APPDIR"
 export DEPLOY_GTK_VERSION=3
 export GSTREAMER_PLUGINS_DIR=/usr/lib/x86_64-linux-gnu/gstreamer-1.0
 export GSTREAMER_HELPERS_DIR=/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0
+export GSTREAMER_INCLUDE_BAD_PLUGINS=1
 export LDAI_OUTPUT="Guayadeque-${GUREVISION:-unknown}-x86_64.AppImage"
 
 cd /out
